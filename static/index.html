@@ -91,12 +91,16 @@
                 
                 // Format Ports
                 let portsHtml = '';
-                if (c.ports) {
+                if (c.ports && c.ports.length > 0) {
                     c.ports.forEach(p => {
-                        portsHtml += `<span class="port-tag">${p.public_port}:${p.private_port}</span>`;
+                        if (p.public_port) {
+                            portsHtml += `<span class="port-tag" title="Mapped to host">${p.public_port} : ${p.private_port}</span>`;
+                        } else {
+                            portsHtml += `<span class="port-tag" style="background-color: #555" title="Exposed internally">${p.private_port} (exposed)</span>`;
+                        }
                     });
                 } else {
-                    portsHtml = '<small>No ports mapped</small>';
+                    portsHtml = '<small>No ports</small>';
                 }
 
                 tr.innerHTML = `
