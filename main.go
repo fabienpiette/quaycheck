@@ -63,14 +63,12 @@ func (s *Server) getContainers(ctx context.Context) ([]ContainerData, error) {
 	for _, c := range containers {
 		var ports []PortMapping
 		for _, p := range c.Ports {
-			if p.PublicPort != 0 {
-				ports = append(ports, PortMapping{
-					PrivatePort: p.PrivatePort,
-					PublicPort:  p.PublicPort,
-					Type:        p.Type,
-					IP:          p.IP,
-				})
-			}
+			ports = append(ports, PortMapping{
+				PrivatePort: p.PrivatePort,
+				PublicPort:  p.PublicPort,
+				Type:        p.Type,
+				IP:          p.IP,
+			})
 		}
 
 		result = append(result, ContainerData{
