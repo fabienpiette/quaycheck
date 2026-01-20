@@ -1,0 +1,39 @@
+services:
+  app:
+    build: .
+    container_name: quaycheck-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # Connect to the socket-proxy via TCP, not the unix socket directly
+      - DOCKER_HOST=tcp://socket-proxy:2375
+    depends_on:
+      - socket-proxy
+    networks:
+      - dashboard-net
+
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy
+    container_name: port-dashboard-proxy
+    restart: unless-stopped
+    volumes:
+      # The proxy needs access to the socket. 
+      # The 'ro' flag prevents the proxy container from deleting the socket file, 
+      # but the proxy logic itself enforces the API permissions defined below.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      # SECURITY: Only enable the specific API endpoints required by the app.
+      # We only need to list containers to see their ports.
+      - CONTAINERS=1
+      # We might need version info for the client negotiation
+      - INFO=1 
+      - VERSION=1
+      # Explicitly disable critical write access (though they are off by default)
+      - POST=0
+    networks:
+      - dashboard-net
+
+networks:
+  dashboard-net:
+    driver: bridge
