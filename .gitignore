@@ -1,0 +1,13 @@
+# Binaries
+quaycheck
+bin/
+
+# Environment
+.env
+
+# Docker
+docker-port-dashboard
+
+# Go
+coverage.out
+coverage.html
