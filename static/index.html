@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>QuayCheck</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <style>
+        .container { max-width: 960px; }
+        .port-tag {
+            background-color: #333;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-right: 4px;
+        }
+        .status-running { color: #2ecc71; }
+        .status-exited { color: #e74c3c; }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>QuayCheck</h1>
+        
+        <article>
+            <header><strong>Port Checker</strong></header>
+            <div class="grid">
+                <div>
+                    <label for="checkPortInput">Check Port Availability</label>
+                    <input type="number" id="checkPortInput" placeholder="e.g. 8080">
+                </div>
+                <div>
+                    <label>&nbsp;</label>
+                    <button onclick="checkPort()">Check</button>
+                </div>
+                <div>
+                    <label>&nbsp;</label>
+                    <button class="secondary" onclick="suggestPort()">Suggest Free Port</button>
+                </div>
+            </div>
+            <p id="checkResult"></p>
+        </article>
+
+        <article>
+            <header><strong>Active Containers</strong></header>
+            <figure>
+                <table role="grid">
+                    <thead>
+                        <tr>
+                            <th scope="col">Container Name</th>
+                            <th scope="col">Image</th>
+                            <th scope="col">State</th>
+                            <th scope="col">Ports (Host -> Container)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="containerTableBody">
+                        <tr><td colspan="4" aria-busy="true">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </figure>
+        </article>
+    </main>
+
+    <script>
+        async function fetchContainers() {
+            try {
+                const res = await fetch('/api/ports');
+                const data = await res.json();
+                renderTable(data);
+            } catch (err) {
+                console.error(err);
+                document.getElementById('containerTableBody').innerHTML = '<tr><td colspan="4">Error loading data</td></tr>';
+            }
+        }
+
+        function renderTable(containers) {
+            const tbody = document.getElementById('containerTableBody');
+            tbody.innerHTML = '';
+
+            if (!containers || containers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4">No containers found.</td></tr>';
+                return;
+            }
+
+            containers.forEach(c => {
+                const tr = document.createElement('tr');
+                
+                // Format Names
+                const name = c.names && c.names.length > 0 ? c.names[0].replace(/^\//, '') : c.id.substring(0, 12);
+                
+                // Format Ports
+                let portsHtml = '';
+                if (c.ports) {
+                    c.ports.forEach(p => {
+                        portsHtml += `<span class="port-tag">${p.public_port}:${p.private_port}</span>`;
+                    });
+                } else {
+                    portsHtml = '<small>No ports mapped</small>';
+                }
+
+                tr.innerHTML = `
+                    <td>${name}</td>
+                    <td><small>${c.image}</small></td>
+                    <td class="${c.state === 'running' ? 'status-running' : 'status-exited'}">${c.state}</td>
+                    <td>${portsHtml}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function checkPort() {
+            const port = document.getElementById('checkPortInput').value;
+            if (!port) return;
+            
+            const resultEl = document.getElementById('checkResult');
+            resultEl.innerHTML = 'Checking...';
+            
+            try {
+                const res = await fetch(`/api/check?port=${port}`);
+                const data = await res.json();
+                
+                if (data.available) {
+                    resultEl.innerHTML = `<span style="color:#2ecc71">✔ ${data.message}</span>`;
+                } else {
+                    resultEl.innerHTML = `<span style="color:#e74c3c">✘ ${data.message}</span>`;
+                }
+            } catch (err) {
+                resultEl.innerHTML = 'Error checking port';
+            }
+        }
+
+        async function suggestPort() {
+            try {
+                const res = await fetch('/api/suggest');
+                const data = await res.json();
+                if (data.port > 0) {
+                    document.getElementById('checkPortInput').value = data.port;
+                    document.getElementById('checkResult').innerHTML = `Suggested: <strong>${data.port}</strong>`;
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                alert("Failed to get suggestion");
+            }
+        }
+
+        // Load on start
+        fetchContainers();
+    </script>
+</body>
+</html>
