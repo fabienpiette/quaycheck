@@ -194,45 +194,45 @@
             .port-check {
                 flex-direction: column;
             }
-            .port-check input {
-                width: 100%;
-            }
-            .port-check button {
-                width: 100%;
-            }
+            .port-check input { width: 100%; }
+            .port-check button { width: 100%; }
 
-            /* Legend stacked */
-            .legend .exposed { margin-left: 0; display: block; margin-top: 0.5rem; }
+            /* Legend inline but smaller */
+            .legend { font-size: 0.625rem; }
 
-            /* Table as cards */
-            table, thead, tbody, th, td, tr {
-                display: block;
-            }
+            /* Table as compact cards */
+            table, thead, tbody, th, td, tr { display: block; }
             thead { display: none; }
             tr {
-                border-bottom: 1px solid var(--border);
-                padding: 0.75rem 0;
+                border: 1px solid var(--border);
+                padding: 0.75rem;
+                margin-bottom: 0.5rem;
             }
-            tr:last-child { border-bottom: none; }
+            tr:last-child { margin-bottom: 0; }
             td {
                 border: none;
-                padding: 0.25rem 0;
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
+                padding: 0;
             }
-            td::before {
-                content: attr(data-label);
-                font-weight: 400;
-                color: var(--muted);
-                font-size: 0.75rem;
-                min-width: 4rem;
+            /* Name cell: full width, no label */
+            td[data-label="Name"] {
+                margin-bottom: 0.5rem;
             }
-            td:first-child { padding-top: 0; }
-            td:last-child { padding-bottom: 0; }
-
-            /* Adjust ports display */
-            .ports { text-align: right; }
+            td[data-label="Name"] .name {
+                font-size: 1rem;
+            }
+            td[data-label="Name"] .image {
+                word-break: break-all;
+            }
+            /* State & Ports inline */
+            td[data-label="State"],
+            td[data-label="Ports"] {
+                display: inline-block;
+                margin-right: 1rem;
+            }
+            td[data-label="State"]::before,
+            td[data-label="Ports"]::before {
+                content: none;
+            }
         }
     </style>
 </head>
