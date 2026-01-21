@@ -2,7 +2,7 @@ module quaycheck
 
 go 1.24.0
 
-require github.com/docker/docker v25.0.6+incompatible
+require github.com/docker/docker v25.0.13+incompatible
 
 require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
