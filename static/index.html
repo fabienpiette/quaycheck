@@ -141,6 +141,13 @@
         .port.exposed { border-style: dashed; color: var(--muted); }
         .empty { color: var(--muted); font-style: italic; }
         .loading { color: var(--muted); }
+        .legend {
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+        .legend .port { font-size: 0.625rem; vertical-align: middle; margin-right: 0.25rem; }
+        .legend .exposed { margin-left: 1rem; }
         .error-banner {
             border: 1px solid var(--border);
             padding: 0.75rem 1rem;
@@ -192,6 +199,10 @@
                     <tr><td colspan="3" class="loading">loading...</td></tr>
                 </tbody>
             </table>
+            <div class="legend">
+                <span class="port">host:container</span> mapped to host
+                <span class="port exposed">container</span> exposed only
+            </div>
         </section>
 
         <footer>
