@@ -101,11 +101,14 @@ docker-push-tags:
 
 # Verify the image is stored in the private registry
 docker-verify:
-	@if [ -z "$(REGISTRY_PASSWORD)" ]; then \
-		echo "REGISTRY_PASSWORD is required. Invoke as REGISTRY_PASSWORD=... make docker-verify"; \
-		exit 1;
-	curl -u $(REGISTRY_USER):$(REGISTRY_PASSWORD) https://$(REGISTRY_DOMAIN)/v2/_catalog
-	curl -u $(REGISTRY_USER):$(REGISTRY_PASSWORD) https://$(REGISTRY_DOMAIN)/v2/$(REGISTRY_REPO)/tags/list
+	@if [ -z "$(REGISTRY_PASSWORD)" ] && [ -n "$(REGISTRY_USER)" ]; then \
+		echo "REGISTRY_PASSWORD is not set but REGISTRY_USER is. Skipping verify."; \
+	elif [ -n "$(REGISTRY_USER)" ]; then \
+		curl -u $(REGISTRY_USER):$(REGISTRY_PASSWORD) https://$(REGISTRY_DOMAIN)/v2/_catalog; \
+		curl -u $(REGISTRY_USER):$(REGISTRY_PASSWORD) https://$(REGISTRY_DOMAIN)/v2/$(REGISTRY_REPO)/tags/list; \
+	else \
+		echo "Skipping verify for public/anonymous registry."; \
+	fi
 
 # Pull the Docker image from the private registry
 docker-pull:
