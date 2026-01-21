@@ -4,7 +4,7 @@ A simple dashboard to see what ports your Docker containers are using. Helps you
 
 [![License: AGPL-3.0](https://img.shields.io/github/license/fabienpiette/quaycheck)](LICENSE)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/fabienpiette/quaycheck)](go.mod)
-[![Release](https://img.shields.io/github/v/release/fabienpiette/quaycheck)](https://github.com/fabienpiette/quaycheck/releases)
+[![Tag](https://img.shields.io/github/v/tag/fabienpiette/quaycheck)](https://github.com/fabienpiette/quaycheck/tags)
 
 ![quaycheck dashboard showing container list with port mappings](docs/screenshot-light.gif)
 
