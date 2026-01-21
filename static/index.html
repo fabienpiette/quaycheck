@@ -94,12 +94,25 @@
             color: var(--fg);
         }
         button.secondary:hover { background: var(--fg); color: var(--bg); }
-        #result {
-            font-size: 0.875rem;
-            min-height: 1.5rem;
+        .history {
+            max-height: 5.5rem;
+            overflow-y: auto;
+            font-size: 0.75rem;
+            font-family: ui-monospace, monospace;
         }
-        #result.ok { color: var(--fg); }
-        #result.err { color: var(--muted); text-decoration: line-through; }
+        .history:empty { display: none; }
+        .history-entry {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 0.5rem;
+        }
+        .history-entry:last-child { border-bottom: none; }
+        .history-entry .port { min-width: 3rem; }
+        .history-entry .status { flex: 1; }
+        .history-entry.ok .status { color: var(--fg); }
+        .history-entry.err .status { color: var(--muted); text-decoration: line-through; }
+        .history-entry .time { color: var(--muted); }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -182,7 +195,7 @@
                 <button onclick="check()">check</button>
                 <button class="secondary" onclick="suggest()">suggest</button>
             </div>
-            <div id="result"></div>
+            <div id="history" class="history"></div>
         </section>
 
         <section>
@@ -280,34 +293,36 @@
             }).join('');
         }
 
+        function addHistory(port, status, ok) {
+            const history = document.getElementById('history');
+            const time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+            const entry = document.createElement('div');
+            entry.className = `history-entry ${ok ? 'ok' : 'err'}`;
+            entry.innerHTML = `<span class="port">${esc(String(port))}</span><span class="status">${esc(status)}</span><span class="time">${time}</span>`;
+            history.insertBefore(entry, history.firstChild);
+            history.scrollTop = 0;
+        }
+
         async function check() {
             const port = document.getElementById('port').value;
             if (!port) return;
-            const el = document.getElementById('result');
-            el.className = '';
-            el.textContent = 'checking...';
             try {
                 const data = await api(`/api/check?port=${port}`);
-                el.className = data.available ? 'ok' : 'err';
-                el.textContent = data.available ? `${port} is available` : `${port} in use`;
+                addHistory(port, data.available ? 'available' : 'in use', data.available);
             } catch (e) {
-                el.className = 'err';
-                el.textContent = e.message || 'error';
+                addHistory(port, e.message || 'error', false);
             }
         }
 
         async function suggest() {
-            const el = document.getElementById('result');
             try {
                 const data = await api('/api/suggest');
                 if (data.port > 0) {
                     document.getElementById('port').value = data.port;
-                    el.textContent = `suggested: ${data.port}`;
-                    el.className = 'ok';
+                    addHistory(data.port, 'suggested', true);
                 }
             } catch (e) {
-                el.className = 'err';
-                el.textContent = e.message || 'error';
+                addHistory('—', e.message || 'error', false);
             }
         }
 
