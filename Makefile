@@ -24,7 +24,7 @@ endif
 REGISTRY_REPO ?= $(REGISTRY_NAMESPACE)/$(BINARY_NAME)
 PUSH_TAGS ?= latest
 
-.PHONY: build test clean run install lint fmt install-binary docker-build docker-tag docker-push docker-verify docker-pull docker-push-tags docker-release up down
+.PHONY: build test clean run install lint fmt install-binary docker-build docker-tag docker-push docker-verify docker-pull docker-push-tags docker-release up down version bump-patch bump-minor bump-major
 
 # Build the binary
 build:
@@ -116,3 +116,37 @@ docker-pull:
 
 # Build, tag, push, and verify the Docker image
 docker-release: docker-build docker-tag docker-push docker-verify
+
+# Show current version
+version:
+	@git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0"
+
+# Bump patch version (note: CI does this automatically on main)
+bump-patch:
+	@LATEST=$$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0"); \
+	MAJOR=$$(echo $$LATEST | sed 's/v//' | cut -d. -f1); \
+	MINOR=$$(echo $$LATEST | sed 's/v//' | cut -d. -f2); \
+	PATCH=$$(echo $$LATEST | sed 's/v//' | cut -d. -f3); \
+	NEW_TAG="v$$MAJOR.$$MINOR.$$((PATCH + 1))"; \
+	echo "Bumping $$LATEST -> $$NEW_TAG"; \
+	git tag -a "$$NEW_TAG" -m "Release $$NEW_TAG"; \
+	git push origin "$$NEW_TAG"
+
+# Bump minor version (resets patch to 0)
+bump-minor:
+	@LATEST=$$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0"); \
+	MAJOR=$$(echo $$LATEST | sed 's/v//' | cut -d. -f1); \
+	MINOR=$$(echo $$LATEST | sed 's/v//' | cut -d. -f2); \
+	NEW_TAG="v$$MAJOR.$$((MINOR + 1)).0"; \
+	echo "Bumping $$LATEST -> $$NEW_TAG"; \
+	git tag -a "$$NEW_TAG" -m "Release $$NEW_TAG"; \
+	git push origin "$$NEW_TAG"
+
+# Bump major version (resets minor and patch to 0)
+bump-major:
+	@LATEST=$$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0"); \
+	MAJOR=$$(echo $$LATEST | sed 's/v//' | cut -d. -f1); \
+	NEW_TAG="v$$((MAJOR + 1)).0.0"; \
+	echo "Bumping $$LATEST -> $$NEW_TAG"; \
+	git tag -a "$$NEW_TAG" -m "Release $$NEW_TAG"; \
+	git push origin "$$NEW_TAG"
