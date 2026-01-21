@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
@@ -47,6 +48,39 @@ type CheckResponse struct {
 type SuggestResponse struct {
 	Port    int    `json:"port"`
 	Message string `json:"message"`
+}
+
+type ErrorResponse struct {
+	Error   string `json:"error"`
+	Message string `json:"message"`
+	Code    string `json:"code,omitempty"`
+}
+
+func writeError(w http.ResponseWriter, status int, code, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(ErrorResponse{
+		Error:   http.StatusText(status),
+		Message: message,
+		Code:    code,
+	})
+}
+
+func classifyDockerError(err error) (int, string, string) {
+	errStr := err.Error()
+
+	switch {
+	case strings.Contains(errStr, "API version") || strings.Contains(errStr, "client version"):
+		return http.StatusBadGateway, "docker_api_version", "Docker API version mismatch. Check socket-proxy compatibility."
+	case strings.Contains(errStr, "connection refused") || strings.Contains(errStr, "no such host"):
+		return http.StatusServiceUnavailable, "docker_unavailable", "Cannot connect to Docker. Is the daemon running?"
+	case strings.Contains(errStr, "permission denied"):
+		return http.StatusForbidden, "docker_permission", "Permission denied accessing Docker socket."
+	case strings.Contains(errStr, "timeout") || strings.Contains(errStr, "deadline exceeded"):
+		return http.StatusGatewayTimeout, "docker_timeout", "Docker request timed out."
+	default:
+		return http.StatusInternalServerError, "docker_error", "Docker error: " + errStr
+	}
 }
 
 func NewDockerClient() (DockerClient, error) {
@@ -97,7 +131,8 @@ func getAllUsedPorts(containers []ContainerData) map[int]bool {
 func (s *Server) handlePorts(w http.ResponseWriter, r *http.Request) {
 	containers, err := s.getContainers(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		status, code, msg := classifyDockerError(err)
+		writeError(w, status, code, msg)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -107,18 +142,19 @@ func (s *Server) handlePorts(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleCheck(w http.ResponseWriter, r *http.Request) {
 	portStr := r.URL.Query().Get("port")
 	if portStr == "" {
-		http.Error(w, "missing port parameter", http.StatusBadRequest)
+		writeError(w, http.StatusBadRequest, "missing_param", "Missing port parameter")
 		return
 	}
 	port, err := strconv.Atoi(portStr)
 	if err != nil {
-		http.Error(w, "invalid port parameter", http.StatusBadRequest)
+		writeError(w, http.StatusBadRequest, "invalid_param", "Invalid port parameter")
 		return
 	}
 
 	containers, err := s.getContainers(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		status, code, msg := classifyDockerError(err)
+		writeError(w, status, code, msg)
 		return
 	}
 
@@ -150,7 +186,8 @@ func (s *Server) handleSuggest(w http.ResponseWriter, r *http.Request) {
 
 	containers, err := s.getContainers(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		status, code, msg := classifyDockerError(err)
+		writeError(w, status, code, msg)
 		return
 	}
 
