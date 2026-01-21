@@ -7,12 +7,16 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 )
+
+var startTime = time.Now()
 
 // DockerClient defines the interface for Docker API interactions
 type DockerClient interface {
@@ -54,6 +58,13 @@ type ErrorResponse struct {
 	Error   string `json:"error"`
 	Message string `json:"message"`
 	Code    string `json:"code,omitempty"`
+}
+
+type StatsResponse struct {
+	MemoryMB   float64 `json:"memory_mb"`
+	Goroutines int     `json:"goroutines"`
+	BinaryKB   int64   `json:"binary_kb"`
+	UptimeSec  int64   `json:"uptime_sec"`
 }
 
 func writeError(w http.ResponseWriter, status int, code, message string) {
@@ -213,6 +224,26 @@ func (s *Server) handleSuggest(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func handleStats(w http.ResponseWriter, r *http.Request) {
+	var mem runtime.MemStats
+	runtime.ReadMemStats(&mem)
+
+	var binaryKB int64
+	if exe, err := os.Executable(); err == nil {
+		if info, err := os.Stat(exe); err == nil {
+			binaryKB = info.Size() / 1024
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(StatsResponse{
+		MemoryMB:   float64(mem.Alloc) / 1024 / 1024,
+		Goroutines: runtime.NumGoroutine(),
+		BinaryKB:   binaryKB,
+		UptimeSec:  int64(time.Since(startTime).Seconds()),
+	})
+}
+
 // SetupRouter creates and configures the HTTP router
 func SetupRouter(server *Server) *http.ServeMux {
 	mux := http.NewServeMux()
@@ -221,6 +252,7 @@ func SetupRouter(server *Server) *http.ServeMux {
 	mux.HandleFunc("/api/ports", server.handlePorts)
 	mux.HandleFunc("/api/check", server.handleCheck)
 	mux.HandleFunc("/api/suggest", server.handleSuggest)
+	mux.HandleFunc("/api/stats", handleStats)
 	return mux
 }
 

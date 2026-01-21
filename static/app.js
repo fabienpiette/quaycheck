@@ -119,5 +119,18 @@ async function suggest() {
     }
 }
 
+async function loadStats() {
+    try {
+        const data = await api('/api/stats');
+        const el = document.getElementById('stats');
+        const mem = data.memory_mb.toFixed(1);
+        const bin = data.binary_kb > 1024
+            ? (data.binary_kb / 1024).toFixed(1) + 'MB'
+            : data.binary_kb + 'KB';
+        el.textContent = `${mem}MB ram · ${bin} bin · ${data.goroutines} goroutines`;
+    } catch (e) {}
+}
+
 loadTheme();
 load();
+loadStats();

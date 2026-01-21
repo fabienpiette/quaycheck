@@ -184,7 +184,13 @@ footer {
     border-top: 1px solid var(--border);
     font-size: 0.75rem;
     color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
+.stats { font-family: ui-monospace, monospace; }
 
 /* Desktop: add spacing between table columns */
 th, td { padding-right: 1rem; }
