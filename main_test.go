@@ -170,8 +170,8 @@ func TestHandleSuggest(t *testing.T) {
 	server := &Server{client: mockClient}
 
 	tests := []struct {
-		startParam    string
-		expectedPort  int
+		startParam   string
+		expectedPort int
 	}{
 		{"8000", 8002}, // 8000, 8001 used
 		{"9000", 9000}, // 9000 free
@@ -240,7 +240,7 @@ func TestSetupRouter(t *testing.T) {
 	if mux == nil {
 		t.Error("Expected mux to be not nil")
 	}
-	
+
 	req := httptest.NewRequest("GET", "/api/ports", nil)
 	_, pattern := mux.Handler(req)
 	// In Go 1.22+ mux.Handler returns pattern, but here it returns handler and pattern string.
@@ -248,7 +248,7 @@ func TestSetupRouter(t *testing.T) {
 	if pattern == "" {
 		// Fallback check if pattern matching behaves differently
 	}
-	
+
 	w := httptest.NewRecorder()
 	mux.ServeHTTP(w, req)
 	if w.Result().StatusCode != http.StatusOK {
