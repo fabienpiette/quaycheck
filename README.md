@@ -2,9 +2,28 @@
 
 A simple dashboard to see what ports your Docker containers are using. Helps you find free ports when spinning up new services.
 
+[![License: AGPL-3.0](https://img.shields.io/github/license/fabienpiette/quaycheck)](LICENSE)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/fabienpiette/quaycheck)](go.mod)
+[![Release](https://img.shields.io/github/v/release/fabienpiette/quaycheck)](https://github.com/fabienpiette/quaycheck/releases)
+
+![quaycheck dashboard showing container list with port mappings](docs/screenshot-light.png)
+
+<p align="center">
+<a href="https://buymeacoffee.com/fabienpiette" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="60"></a>
+</p>
+
 ## Why?
 
 I kept running into port conflicts when starting new containers. Instead of running `docker ps` and squinting at the output, I wanted something I could just open in a browser.
+
+## Features
+
+- View all containers and their port mappings at a glance
+- Check if a specific port is available
+- Get suggestions for free ports
+- Click any port to copy it to clipboard
+- Dark/light theme toggle
+- Minimal footprint (see stats in footer)
 
 ## Security
 
