@@ -89,8 +89,14 @@ jobs:
       - name: Get latest tag and calculate next version
         id: version
         run: |
-          # Get latest tag, default to v0.0.0 if none exists
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          # Fetch all tags from remote
+          git fetch --tags
+
+          # Get latest tag sorted by version, default to v0.0.0 if none exists
+          LATEST_TAG=$(git tag -l 'v*' --sort=-v:refname | head -n1)
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v0.0.0"
+          fi
           echo "Latest tag: $LATEST_TAG"
 
           # Extract version numbers
@@ -106,7 +112,16 @@ jobs:
           echo "New tag: $NEW_TAG"
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
 
+          # Check if tag already exists
+          if git tag -l | grep -q "^${NEW_TAG}$"; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "Tag $NEW_TAG already exists, skipping"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create and push tag
+        if: steps.version.outputs.skip != 'true'
         env:
           NEW_TAG: ${{ steps.version.outputs.new_tag }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
