@@ -87,6 +87,16 @@ button.secondary {
     color: var(--fg);
 }
 button.secondary:hover { background: var(--fg); color: var(--bg); }
+button.refresh {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 0.875rem;
+    cursor: pointer;
+    padding: 0 0.25rem;
+    vertical-align: middle;
+}
+button.refresh:hover { color: var(--fg); }
 .history {
     max-height: 5.5rem;
     overflow-y: auto;
