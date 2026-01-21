@@ -24,7 +24,7 @@ endif
 REGISTRY_REPO ?= $(REGISTRY_NAMESPACE)/$(BINARY_NAME)
 PUSH_TAGS ?= latest
 
-.PHONY: build test clean run install lint fmt install-binary docker-build docker-tag docker-push docker-verify docker-pull docker-push-tags docker-release up down version bump-patch bump-minor bump-major
+.PHONY: build test clean run install lint fmt install-binary docker-build docker-tag docker-push docker-verify docker-pull docker-push-tags docker-release up down logs version bump-patch bump-minor bump-major
 
 # Build the binary
 build:
@@ -72,6 +72,9 @@ up:
 
 down:
 	docker compose down
+
+logs:
+	docker compose logs -f
 
 # Build the Docker image
 docker-build:
