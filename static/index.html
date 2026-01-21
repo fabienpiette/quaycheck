@@ -179,6 +179,61 @@
             font-size: 0.75rem;
             color: var(--muted);
         }
+
+        /* Desktop: add spacing between table columns */
+        th, td { padding-right: 1rem; }
+        th:last-child, td:last-child { padding-right: 0; }
+
+        /* Mobile styles */
+        @media (max-width: 640px) {
+            main { padding: 1.5rem 1rem; }
+            header { margin-bottom: 2rem; }
+            section { margin-bottom: 2rem; }
+
+            /* Stack port check inputs */
+            .port-check {
+                flex-direction: column;
+            }
+            .port-check input {
+                width: 100%;
+            }
+            .port-check button {
+                width: 100%;
+            }
+
+            /* Legend stacked */
+            .legend .exposed { margin-left: 0; display: block; margin-top: 0.5rem; }
+
+            /* Table as cards */
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            thead { display: none; }
+            tr {
+                border-bottom: 1px solid var(--border);
+                padding: 0.75rem 0;
+            }
+            tr:last-child { border-bottom: none; }
+            td {
+                border: none;
+                padding: 0.25rem 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+            }
+            td::before {
+                content: attr(data-label);
+                font-weight: 400;
+                color: var(--muted);
+                font-size: 0.75rem;
+                min-width: 4rem;
+            }
+            td:first-child { padding-top: 0; }
+            td:last-child { padding-bottom: 0; }
+
+            /* Adjust ports display */
+            .ports { text-align: right; }
+        }
     </style>
 </head>
 <body>
@@ -286,9 +341,9 @@
                     ).join('')
                     : '<span class="empty">—</span>';
                 return `<tr>
-                    <td><div class="name">${name}</div><div class="image">${image}</div></td>
-                    <td><span class="state ${state}">${state}</span></td>
-                    <td class="ports">${ports}</td>
+                    <td data-label="Name"><div class="name">${name}</div><div class="image">${image}</div></td>
+                    <td data-label="State"><span class="state ${state}">${state}</span></td>
+                    <td data-label="Ports" class="ports">${ports}</td>
                 </tr>`;
             }).join('');
         }
