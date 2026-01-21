@@ -142,7 +142,7 @@
         .empty { color: var(--muted); font-style: italic; }
         .loading { color: var(--muted); }
         .legend {
-            margin-top: 1rem;
+            margin-bottom: 1rem;
             font-size: 0.75rem;
             color: var(--muted);
         }
@@ -187,6 +187,10 @@
 
         <section>
             <h2>Containers</h2>
+            <div class="legend">
+                <span class="port">host:container</span> mapped to host
+                <span class="port exposed">container</span> exposed only
+            </div>
             <table>
                 <thead>
                     <tr>
@@ -199,10 +203,6 @@
                     <tr><td colspan="3" class="loading">loading...</td></tr>
                 </tbody>
             </table>
-            <div class="legend">
-                <span class="port">host:container</span> mapped to host
-                <span class="port exposed">container</span> exposed only
-            </div>
         </section>
 
         <footer>
