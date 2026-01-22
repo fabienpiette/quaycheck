@@ -113,8 +113,14 @@ function render(containers) {
         const name = esc(c.names?.[0]?.replace(/^\//, '') || c.id.slice(0, 12));
         const image = esc(c.image || '');
         const state = esc(c.state || '');
+        const seen = new Set();
         const ports = c.ports?.length
-            ? c.ports.map(p => p.public_port
+            ? c.ports.filter(p => {
+                const key = `${p.public_port || 0}:${p.private_port}`;
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            }).map(p => p.public_port
                 ? `<span class="port">${esc(String(p.public_port))}:${esc(String(p.private_port))}</span>`
                 : `<span class="port exposed">${esc(String(p.private_port))}</span>`
             ).join('')
