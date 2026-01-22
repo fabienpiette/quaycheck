@@ -11,3 +11,6 @@ docker-port-dashboard
 # Go
 coverage.out
 coverage.html
+
+# Local
+tmp/
