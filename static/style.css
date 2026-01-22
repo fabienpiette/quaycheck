@@ -39,14 +39,15 @@ h1 {
 }
 .theme-toggle {
     background: none;
-    border: 1px solid var(--border);
-    color: var(--fg);
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
+    border: none;
+    color: var(--muted);
+    padding: 0;
+    font-size: 1.25rem;
     cursor: pointer;
-    font-family: inherit;
+    line-height: 1;
+    transition: color 0.15s;
 }
-.theme-toggle:hover { background: var(--fg); color: var(--bg); }
+.theme-toggle:hover { color: var(--fg); }
 section { margin-bottom: 3rem; }
 h2 {
     font-size: 0.75rem;
