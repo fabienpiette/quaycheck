@@ -204,6 +204,14 @@ footer {
     gap: 0.5rem;
 }
 .stats { font-family: ui-monospace, monospace; }
+.github {
+    color: var(--muted);
+    margin-left: 0.5rem;
+    vertical-align: middle;
+    transition: color 0.15s;
+}
+.github:hover { color: var(--fg); }
+.github svg { vertical-align: -2px; }
 
 /* Desktop: add spacing between table columns */
 th, td { padding-right: 1rem; }
