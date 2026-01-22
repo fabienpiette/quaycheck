@@ -33,9 +33,9 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>State</th>
-                        <th>Ports</th>
+                        <th class="sortable" onclick="sortBy('name')">Name <span id="sort-name"></span></th>
+                        <th class="sortable" onclick="sortBy('state')">State <span id="sort-state"></span></th>
+                        <th class="sortable" onclick="sortBy('ports')">Ports <span id="sort-ports"></span></th>
                     </tr>
                 </thead>
                 <tbody id="containers">

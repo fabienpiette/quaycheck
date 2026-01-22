@@ -1,5 +1,9 @@
 const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 
+let containersData = [];
+let sortColumn = 'name';
+let sortAsc = true;
+
 async function copyPort(el) {
     const text = el.textContent.split(':')[0];
     if (!text || text === 'host' || text === 'container') return;
@@ -51,8 +55,8 @@ function showError(el, err) {
 async function load() {
     const tbody = document.getElementById('containers');
     try {
-        const data = await api('/api/ports');
-        render(data);
+        containersData = await api('/api/ports');
+        sortAndRender();
     } catch (e) {
         if (e.message) {
             showError(tbody, e);
@@ -60,6 +64,43 @@ async function load() {
             tbody.innerHTML = '<tr><td colspan="3" class="empty">failed to connect</td></tr>';
         }
     }
+}
+
+function sortBy(column) {
+    if (sortColumn === column) {
+        sortAsc = !sortAsc;
+    } else {
+        sortColumn = column;
+        sortAsc = true;
+    }
+    sortAndRender();
+}
+
+function sortAndRender() {
+    const sorted = [...containersData].sort((a, b) => {
+        let cmp = 0;
+        if (sortColumn === 'name') {
+            const nameA = (a.names?.[0] || a.id).toLowerCase();
+            const nameB = (b.names?.[0] || b.id).toLowerCase();
+            cmp = nameA.localeCompare(nameB);
+        } else if (sortColumn === 'state') {
+            cmp = (a.state || '').localeCompare(b.state || '');
+        } else if (sortColumn === 'ports') {
+            const portA = a.ports?.[0]?.public_port || a.ports?.[0]?.private_port || 0;
+            const portB = b.ports?.[0]?.public_port || b.ports?.[0]?.private_port || 0;
+            cmp = portA - portB;
+        }
+        return sortAsc ? cmp : -cmp;
+    });
+    render(sorted);
+    updateSortIndicators();
+}
+
+function updateSortIndicators() {
+    ['name', 'state', 'ports'].forEach(col => {
+        const el = document.getElementById(`sort-${col}`);
+        if (el) el.textContent = sortColumn === col ? (sortAsc ? '▲' : '▼') : '';
+    });
 }
 
 function render(containers) {
